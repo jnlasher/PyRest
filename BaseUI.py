@@ -9,7 +9,7 @@ class Application:
         master.title('PyREST')
         master.minsize(width=550, height=250)
         self.c_row = 1
-        val = tk.IntVar()
+        self.val = tk.IntVar()
 
         # GENERATE FRAMES
         topFrame = tk.Frame(master, bg='cyan', width = 450, height=50, padx=30, pady=3)
@@ -22,8 +22,11 @@ class Application:
         divs = ttk.Notebook(centerFrame)
         self.headerPage = ttk.Frame(divs)
         self.bodyPage = ttk.Frame(divs)
+        self.menuPage = tk.Frame(self.bodyPage, bg='cyan', width=5, height=5)
         divs.add(self.headerPage, text='Headers')
         divs.add(self.bodyPage, text='Body')
+        self.updateFrame = tk.Frame(self.bodyPage, width=10, height=10, bg='cyan')
+
 
         # CREATE WIDGETS
         self.requestType = tk.StringVar()
@@ -36,10 +39,10 @@ class Application:
         self.headersVal = tk.Entry(self.headerPage, width=39)
         self.addHButton = tk.Button(self.headerPage, text = 'Add Header', command = self.AddHeader)
         # Split
-        self.formData = tk.Radiobutton(self.bodyPage, text='form-data', variable=val, value=1)
-        self.urlEncoded = tk.Radiobutton(self.bodyPage, text='x-www-form-urlencoded', variable=val, value=2)
-        self.rawData = tk.Radiobutton(self.bodyPage, text='raw', variable=val, value=3)
-        self.binaryFile = tk.Radiobutton(self.bodyPage, text='binary', variable=val, value=4)
+        self.formData = tk.Radiobutton(self.bodyPage, text='form-data', variable=self.val, value=1, command=self.UpdateBody)
+        self.urlEncoded = tk.Radiobutton(self.bodyPage, text='x-www-form-urlencoded', variable=self.val, value=2, command=self.UpdateBody)
+        self.rawData = tk.Radiobutton(self.bodyPage, text='raw', variable=self.val, value=3, command=self.UpdateBody)
+        self.binaryFile = tk.Radiobutton(self.bodyPage, text='binary', variable=self.val, value=4, command=self.UpdateBody)
 
         # CREATE LAYOUT
         self.requestOption.grid(row=0, column=0, padx=3)
@@ -53,6 +56,7 @@ class Application:
         self.urlEncoded.grid(row=0, column=1)
         self.rawData.grid(row=0, column=2)
         self.binaryFile.grid(row=0, column=3)
+        self.updateFrame.grid(row=1)
 
 
     def AddHeader(self):
@@ -63,8 +67,17 @@ class Application:
         self.addHButton.grid(row=self.c_row+1, column=0)
         self.c_row += 1
 
+    def UpdateBody(self):
+        print(self.val.get())
+        self._blankWidgets()
+
     def UpdateRequestType(self, *args):
         print('Request type is: {}'.format(self.requestType.get()))
+
+    def _blankWidgets(self):
+        print('clearing...')
+        for item in self.updateFrame.grid_slaves():
+            item.grid_forget()
 
 
 root = tk.Tk()
