@@ -22,10 +22,9 @@ class Application:
         divs = ttk.Notebook(centerFrame)
         self.headerPage = ttk.Frame(divs)
         self.bodyPage = ttk.Frame(divs)
-        self.menuPage = tk.Frame(self.bodyPage, bg='cyan', width=5, height=5)
         divs.add(self.headerPage, text='Headers')
         divs.add(self.bodyPage, text='Body')
-        self.updateFrame = tk.Frame(self.bodyPage, width=10, height=10, bg='cyan')
+        self.updateFrame = tk.Frame(self.bodyPage, width=450, height=20, bg='cyan')
 
 
         # CREATE WIDGETS
@@ -48,6 +47,7 @@ class Application:
         self.requestOption.grid(row=0, column=0, padx=3)
         self.addressLabel.grid(row=0, column=1, padx=3)
         divs.grid()
+        # First Division
         self.headersKey.grid(row=0, column=0, padx=3)
         self.headersVal.grid(row=0, column=1, padx=3)
         self.addHButton.grid(row=1, column=0)
@@ -56,7 +56,7 @@ class Application:
         self.urlEncoded.grid(row=0, column=1)
         self.rawData.grid(row=0, column=2)
         self.binaryFile.grid(row=0, column=3)
-        self.updateFrame.grid(row=1)
+        self.updateFrame.grid(row=1, columnspan=3, sticky='ew', padx=6)
 
 
     def AddHeader(self):
@@ -69,7 +69,22 @@ class Application:
 
     def UpdateBody(self):
         print(self.val.get())
+        selection = self.val.get()
         self._blankWidgets()
+        if selection == 1:
+            formKey = tk.Entry(self.updateFrame)
+            formVal = tk.Entry(self.updateFrame)
+            formKey.grid(row=0, column=0)
+            formVal.grid(row=0, column=1)
+        elif selection == 2:
+            encodedKey = tk.Entry(self.updateFrame)
+            encodedVal = tk.Entry(self.updateFrame)
+            encodedKey.grid(row=0, column=0)
+            encodedVal.grid(row=0, column=1)
+        elif selection == 3:
+            pass
+        elif selection == 4:
+            pass
 
     def UpdateRequestType(self, *args):
         print('Request type is: {}'.format(self.requestType.get()))
