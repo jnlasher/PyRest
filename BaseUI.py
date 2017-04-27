@@ -1,5 +1,9 @@
+#!/usr/bin/env/Python
+
 import tkinter as tk
 from tkinter import ttk
+import requests
+import json
 
 
 class Application:
@@ -10,21 +14,22 @@ class Application:
         master.minsize(width=550, height=250)
         self.c_row = 1
         self.val = tk.IntVar()
+        self.formatSel = tk.StringVar()
 
         # GENERATE FRAMES
         topFrame = tk.Frame(master, bg='cyan', width = 450, height=50, padx=30, pady=3)
         centerFrame = tk.Frame(master, bg='gray2', width=50, height=40, padx=30, pady=3)
-        responseFrame = tk.Frame(master, bg='white', width = 450, height = 45, padx=30, pady=3)
+        self.responseFrame = tk.Frame(master, bg='white', width = 450, height = 45, padx=30, pady=3)
         topFrame.grid_propagate(False)
         topFrame.grid(row=0, sticky='ew')
         centerFrame.grid(row=1, sticky='ew')
-        responseFrame.grid(row=3, sticky='ew')
+        self.responseFrame.grid(row=3, sticky='ew')
         divs = ttk.Notebook(centerFrame)
         self.headerPage = ttk.Frame(divs)
         self.bodyPage = ttk.Frame(divs)
         divs.add(self.headerPage, text='Headers')
         divs.add(self.bodyPage, text='Body')
-        self.updateFrame = tk.Frame(self.bodyPage, width=450, height=20, bg='cyan')
+        self.updateFrame = tk.Frame(self.bodyPage, width=360, height=20, bg='cyan')
 
 
         # CREATE WIDGETS
@@ -56,7 +61,36 @@ class Application:
         self.urlEncoded.grid(row=0, column=1)
         self.rawData.grid(row=0, column=2)
         self.binaryFile.grid(row=0, column=3)
-        self.updateFrame.grid(row=1, columnspan=3, sticky='ew', padx=6)
+        self.updateFrame.grid(row=1, columnspan=4, sticky='ew', padx=6)
+        # Bottom Layer
+        self.Submit = tk.Button(self.responseFrame, text='Submit', command=self.Submit)
+        self.Submit.grid(row=0, column=0)
+
+    # Create the HTTP Request ------------------------------------------------------------------------------------------
+    def Submit(self):
+        temp = []
+        newRequest = self.UpdateRequestType()
+        address = self.addressLabel.get()
+        print('{} {}'.format(newRequest, address))
+
+        for item in self.headerPage.grid_slaves():
+            if isinstance(item, tk.Entry): # Check how many header Entry boxes exist
+                if item.get(): # Check if anything was entered
+                    temp.append((item.get()))
+
+        headers = dict(zip(*[iter(reversed(temp))]*2))
+        print(headers)
+
+        if newRequest == 'GET':
+            r = requests.get(address, headers)
+        elif newRequest == 'POST':
+            r = requests.post(address, headers)
+
+        response = tk.StringVar()
+        print(r.json())
+        response.set(r.json())
+        responseBox = tk.Text(self.responseFrame)
+        responseBox.grid(row=1, column=0)
 
 
     def AddHeader(self):
@@ -72,28 +106,45 @@ class Application:
         selection = self.val.get()
         self._blankWidgets()
         if selection == 1:
+            key = tk.Label(self.updateFrame, text='Key: ')
+            value = tk.Label(self.updateFrame, text='Value: ')
             formKey = tk.Entry(self.updateFrame)
-            formVal = tk.Entry(self.updateFrame)
-            formKey.grid(row=0, column=0)
-            formVal.grid(row=0, column=1)
+            formVal = tk.Entry(self.updateFrame, width=30)
+            key.grid(row=0, column=0)
+            formKey.grid(row=0, column=1)
+            value.grid(row=0, column=2)
+            formVal.grid(row=0, column=3)
         elif selection == 2:
+            key = tk.Label(self.updateFrame, text='Key: ')
+            value = tk.Label(self.updateFrame, text='Value: ')
             encodedKey = tk.Entry(self.updateFrame)
-            encodedVal = tk.Entry(self.updateFrame)
-            encodedKey.grid(row=0, column=0)
-            encodedVal.grid(row=0, column=1)
+            encodedVal = tk.Entry(self.updateFrame, width=30)
+            key.grid(row=0, column=0)
+            encodedKey.grid(row=0, column=1)
+            value.grid(row=0, column=2)
+            encodedVal.grid(row=0, column=3)
         elif selection == 3:
-            pass
+            self.formatSel.set('Text')
+            self.formatSel.trace('w', self.UpdateFormat)
+            entry = tk.Text(self.updateFrame)
+            entryFormat = tk.OptionMenu(self.updateFrame, self.formatSel, 'Text', 'JSON', 'HTML', 'XML')
+            entry.grid(row=1, column=0)
+            entryFormat.grid(row=0, column=0)
         elif selection == 4:
-            pass
+            placeHolder = tk.Label(self.updateFrame, text='Binary file upload coming soon')
+            placeHolder.grid()
+
+    ## Begin Helpers ---------------------------------------------------------------------------------------------------
+    def UpdateFormat(self, *args):
+        print('Format type is: {}'.format(self.formatSel.get()))
 
     def UpdateRequestType(self, *args):
-        print('Request type is: {}'.format(self.requestType.get()))
+        return self.requestType.get()
 
     def _blankWidgets(self):
-        print('clearing...')
         for item in self.updateFrame.grid_slaves():
             item.grid_forget()
-
+## End Class -----------------------------------------------------------------------------------------------------------
 
 root = tk.Tk()
 app = Application(root)
