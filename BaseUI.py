@@ -11,15 +11,15 @@ class Application:
         #SETUP
         self.master = master
         master.title('PyREST')
-        master.minsize(width=550, height=250)
+        master.minsize(width=723, height=570)
         self.c_row = 1
         self.val = tk.IntVar()
         self.formatSel = tk.StringVar()
 
         # GENERATE FRAMES
-        topFrame = tk.Frame(master, bg='cyan', width = 450, height=50, padx=30, pady=3)
-        centerFrame = tk.Frame(master, bg='gray2', width=50, height=40, padx=30, pady=3)
-        self.responseFrame = tk.Frame(master, bg='white', width = 450, height = 45, padx=30, pady=3)
+        topFrame = tk.Frame(master, bg='cyan', width = 723, height=50, padx=30, pady=3)
+        centerFrame = tk.Frame(master, bg='gray2', width=723, height=40, padx=30, pady=3)
+        self.responseFrame = tk.Frame(master, bg='white', width = 723, height = 45, padx=30, pady=3)
         topFrame.grid_propagate(False)
         topFrame.grid(row=0, sticky='ew')
         centerFrame.grid(row=1, sticky='ew')
@@ -29,7 +29,7 @@ class Application:
         self.bodyPage = ttk.Frame(divs)
         divs.add(self.headerPage, text='Headers')
         divs.add(self.bodyPage, text='Body')
-        self.updateFrame = tk.Frame(self.bodyPage, width=360, height=20, bg='cyan')
+        self.updateFrame = tk.Frame(self.bodyPage, width=360, height=20)
 
 
         # CREATE WIDGETS
@@ -68,7 +68,8 @@ class Application:
 
     # Create the HTTP Request ------------------------------------------------------------------------------------------
     def Submit(self):
-        temp = []
+        htemp = []
+        btemp = []
         newRequest = self.UpdateRequestType()
         address = self.addressLabel.get()
         print('{} {}'.format(newRequest, address))
@@ -76,22 +77,29 @@ class Application:
         for item in self.headerPage.grid_slaves():
             if isinstance(item, tk.Entry): # Check how many header Entry boxes exist
                 if item.get(): # Check if anything was entered
-                    temp.append((item.get()))
+                    htemp.append(item.get())
 
-        headers = dict(zip(*[iter(reversed(temp))]*2))
+        headers = dict(zip(*[iter(reversed(htemp))]*2))
         print(headers)
 
+        for item in self.updateFrame.grid_slaves():
+            if isinstance(item, tk.Entry):
+                if item.get():
+                    btemp.append(item.get())
+
+        body = dict(zip(*[iter(reversed(btemp))]*2))
+        print(body)
+
         if newRequest == 'GET':
-            r = requests.get(address, headers)
+            r = requests.get(url=address, headers=headers)
         elif newRequest == 'POST':
-            r = requests.post(address, headers)
+            r = requests.post(url=address, headers=headers, data=body)
 
         response = tk.StringVar()
-        print(r.json())
-        response.set(r.json())
+        response.set(r.text)
         responseBox = tk.Text(self.responseFrame)
-        responseBox.grid(row=1, column=0)
-
+        responseBox.insert(1.0, response.get())
+        responseBox.grid()
 
     def AddHeader(self):
         newKey = tk.Entry(self.headerPage)
