@@ -3,7 +3,6 @@
 import tkinter as tk
 from tkinter import ttk
 import requests
-import json
 
 
 class Application:
@@ -13,6 +12,7 @@ class Application:
         master.title('PyREST')
         master.minsize(width=723, height=570)
         self.c_row = 1
+        self.r_num = 1
         self.val = tk.IntVar()
         self.formatSel = tk.StringVar()
 
@@ -30,7 +30,7 @@ class Application:
         divs.add(self.headerPage, text='Headers')
         divs.add(self.bodyPage, text='Body')
         self.updateFrame = tk.Frame(self.bodyPage, width=360, height=20)
-
+        self.responseDiv = ttk.Notebook(self.responseFrame)
 
         # CREATE WIDGETS
         self.requestType = tk.StringVar()
@@ -95,11 +95,7 @@ class Application:
         elif newRequest == 'POST':
             r = requests.post(url=address, headers=headers, data=body)
 
-        response = tk.StringVar()
-        response.set(r.text)
-        responseBox = tk.Text(self.responseFrame)
-        responseBox.insert(1.0, response.get())
-        responseBox.grid()
+        self.CreateResponse(r)
 
     def AddHeader(self):
         newKey = tk.Entry(self.headerPage)
@@ -152,6 +148,18 @@ class Application:
     def _blankWidgets(self):
         for item in self.updateFrame.grid_slaves():
             item.grid_forget()
+
+    def CreateResponse(self, data):
+        newResponse = ttk.Frame(self.responseDiv)
+        self.responseDiv.add(newResponse, text='Response {}'.format(self.r_num))
+        response = tk.StringVar()
+        response.set(data.text)
+        responseBox = tk.Text(newResponse)
+        responseBox.insert(1.0, response.get())
+        self.r_num+=1
+        self.responseDiv.grid()
+        responseBox.grid()
+
 ## End Class -----------------------------------------------------------------------------------------------------------
 
 root = tk.Tk()
